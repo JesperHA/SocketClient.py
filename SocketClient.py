@@ -27,6 +27,8 @@ xAxis = 500
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     s.connect((HOST, PORT))
+    read = s.makefile('r')
+    write = s.makefile('w')
 
     while True:
         # value = input("Input new value: ")
@@ -51,15 +53,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             zData = str(zInput + 1500)
             value = (stringXAxis + xData + " " + stringYAxis + yData + " " + stringZAxis + zData)
 
-        # if xInput < 0:
-        #     data = str(xInput + 1500)
-        #     value = (string + data)>
-
 
 
         s.sendall(bytes(value, 'utf8'))
 
-        time.sleep(1)
+        time.sleep(0.01)
 
 
         # data = s.recv(1024)
