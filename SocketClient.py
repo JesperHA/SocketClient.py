@@ -17,18 +17,15 @@ print("Joystick recognized: ")
 print(joystick.get_name())
 print(joystick.get_numbuttons())
 
-
+servoRange = 500
 stringXAxis = "xAxis "
 stringYAxis = "yAxis "
 stringZAxis = "zAxis "
 value = " "
-xAxis = 500
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     s.connect((HOST, PORT))
-    read = s.makefile('r')
-    write = s.makefile('w')
 
     while True:
         # value = input("Input new value: ")
@@ -38,11 +35,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         joystick.get_axis(2)
         joystick.get_axis(3)
 
-        xInput = joystick.get_axis(0) * 1000
-        yInput = joystick.get_axis(1) * 1000
-        zInput = joystick.get_axis(3) * 1000
-
-
+        xInput = joystick.get_axis(0) * servoRange
+        yInput = joystick.get_axis(1) * servoRange
+        zInput = joystick.get_axis(3) * servoRange
 
         if joystick.get_button(1) == 1:
             value = "q"
@@ -53,13 +48,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             zData = str(zInput + 1500)
             value = (stringXAxis + xData + " " + stringYAxis + yData + " " + stringZAxis + zData)
 
-
-
         s.sendall(bytes(value, 'utf8'))
 
-        time.sleep(0.01)
+        # time.sleep(0.001666)
 
-
-        # data = s.recv(1024)
-
-        # print('Received', repr(data))
+        data = s.recv(1024)
+        # receivedData = str(data, 'utf8')
+        # counter = counter + 1
+        # print('Received ' + receivedData + " ", counter)
