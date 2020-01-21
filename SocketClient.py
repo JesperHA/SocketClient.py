@@ -28,6 +28,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))
 
     while True:
+
         # value = input("Input new value: ")
         pygame.event.pump()
         joystick.get_axis(0)
@@ -50,7 +51,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
         s.sendall(bytes(value, 'utf8'))
 
-        # time.sleep(0.001666)
+        # time.sleep(0.00166)
 
         data = s.recv(1024)
         # receivedData = str(data, 'utf8')
