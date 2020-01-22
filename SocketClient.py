@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 import socket
+import sys
 import time
 import zlib
-
+import subprocess
 import numpy as np
 import cv2
 import pygame
@@ -13,7 +14,7 @@ from multiprocessing import Process
 
 
 HOST = '192.168.7.238'  # The server's hostname or IP address
-PORT = 65432        # The port used by the server
+PORT = 65431        # The port used by the server
 
 pygame.init()
 pygame.joystick.init()
@@ -30,7 +31,13 @@ stringYAxis = "yAxis "
 stringZAxis = "zAxis "
 value = " "
 font = cv2.FONT_HERSHEY_PLAIN
-img = cv2.imread("airborne.jpg", 1)
+# img = cv2.imread("airborne.jpg", 1)
+counter = 0
+
+videofile = open("torecv.mp4", "wb")
+# cap = cv2.VideoCapture("torecv.mp4")
+
+
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -38,10 +45,12 @@ s.connect((HOST, PORT))
 
 fps = 0
 frames = 0
-
 while True:
 
     startTime = time.time()
+
+
+
 
 
     # img = cv2.imread("airborne.jpg", 1)
@@ -68,43 +77,56 @@ while True:
     s.sendall(bytes(value, 'utf8'))
 
     # time.sleep(0.00166)
-    data = s.recv(2048000)
-    print("Data: ", data)
+
+    # videofile.write(data)
+    # videofile.close()
+    counter += 1
+    # print("Data: ", data)
+
+
     try:
 
-        # data = zlib.decompress(data)
-        image_string = str(data, 'utf-8')
-        print("Image String: " + image_string)
-        raw_image = base64.b64decode(image_string)
-        print("Raw image")
-        print(raw_image)
-        image = np.frombuffer(raw_image, dtype=np.uint8)
-        print(image)
-        cv2.namedWindow("image", cv2.WINDOW_NORMAL)
-        # cv2.resizeWindow("image", 1280, 720)
-        cv2.resizeWindow("image", 720, 480)
-        img = cv2.imdecode(image, 1)
+        # ret, frame = cap.read()
+        # print("Data: ", data)
+        # print("cap: ", cap)
+        #
+        #     # data = zlib.decompress(data)
+        #     image_string = str(data, 'utf-8')
+        #     print("Image String: " + image_string)
+        #     raw_image = base64.b64decode(image_string)
+        #     print("Raw image")
+        #     print(raw_image)
+        #     image = np.frombuffer(raw_image, dtype=np.uint8)
+        #     print(image)
+        #     cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+        #     # cv2.resizeWindow("image", 1280, 720)
+        #     cv2.resizeWindow("image", 720, 480)
+        #     img = cv2.imdecode(image, 1)
         string = "Throttle: " + str(int(throttle)) + "%"
-        cv2.rectangle(img, (100, 200), (150 + 80, 200 + 25), (255, 255, 255), 1)
-        cv2.putText(img, string, (101, 218), font, 1, (255, 255, 255), 1, cv2.LINE_AA)
-        cv2.imshow("image", img)
+        cv2.rectangle(frame, (100, 200), (150 + 80, 200 + 25), (255, 255, 255), 1)
+        cv2.putText(frame, string, (101, 218), font, 1, (255, 255, 255), 1, cv2.LINE_AA)
+        cv2.imshow("image", frame)
     except:
         print("Didn't work")
 
-    delay = time.time() - startTime
-    # sleep = ((1 / 24) - delay % (1 / 24))
-    # time.sleep(sleep)
-    tickTime = delay
-    tickrate = 1 / tickTime
 
-    frames += 1
-    fps += tickrate
-    realFps = fps / frames
 
-    print("tickTime: ", tickTime)
-    print("tickrate: ", tickrate)
-    print("fps: ", realFps)
+    try:
+        delay = time.time() - startTime
+        # sleep = ((1 / 24) - delay % (1 / 24))
+        # time.sleep(sleep)
+        tickTime = delay
+        tickrate = 1 / tickTime
 
+        frames += 1
+        fps += tickrate
+        realFps = fps / frames
+
+        print("tickTime: ", tickTime)
+        print("tickrate: ", tickrate)
+        print("fps: ", realFps)
+    except:
+        print("Fps error!")
 
 
 
