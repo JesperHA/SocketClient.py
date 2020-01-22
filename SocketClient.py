@@ -68,22 +68,24 @@ while True:
     s.sendall(bytes(value, 'utf8'))
 
     # time.sleep(0.00166)
-    data = s.recv(2048000)
-    print("Data: ", data)
+    data = s.recv(50000)
+    # print("Data: ", data)
     try:
-
-        # data = zlib.decompress(data)
-        image_string = str(data, 'utf-8')
-        print("Image String: " + image_string)
-        raw_image = base64.b64decode(image_string)
-        print("Raw image")
-        print(raw_image)
-        image = np.frombuffer(raw_image, dtype=np.uint8)
-        print(image)
-        cv2.namedWindow("image", cv2.WINDOW_NORMAL)
-        # cv2.resizeWindow("image", 1280, 720)
-        cv2.resizeWindow("image", 720, 480)
-        img = cv2.imdecode(image, 1)
+        img = None
+        if data:
+            # data = zlib.decompress(data)
+            image_string = str(data, 'utf-8')
+            # print("Image String: " + image_string)
+            raw_image = base64.b64decode(image_string)
+            # print("Raw image")
+            # print(raw_image)
+            image = np.frombuffer(raw_image, dtype=np.uint8)
+            # print(image)
+            cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+            # cv2.resizeWindow("image", 1280, 720)
+            cv2.resizeWindow("image", 720, 480)
+            img = cv2.imdecode(image, 1)
+            data = None
         string = "Throttle: " + str(int(throttle)) + "%"
         cv2.rectangle(img, (100, 200), (150 + 80, 200 + 25), (255, 255, 255), 1)
         cv2.putText(img, string, (101, 218), font, 1, (255, 255, 255), 1, cv2.LINE_AA)
@@ -101,8 +103,8 @@ while True:
     fps += tickrate
     realFps = fps / frames
 
-    print("tickTime: ", tickTime)
-    print("tickrate: ", tickrate)
+    # print("tickTime: ", tickTime)
+    # print("tickrate: ", tickrate)
     print("fps: ", realFps)
 
 
