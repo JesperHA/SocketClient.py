@@ -2,9 +2,14 @@
 
 import socket
 import time
+import zlib
+
 import numpy as np
 import cv2
 import pygame
+import zmq
+import base64
+from multiprocessing import Process
 
 
 HOST = '192.168.7.238'  # The server's hostname or IP address
@@ -25,47 +30,82 @@ stringYAxis = "yAxis "
 stringZAxis = "zAxis "
 value = " "
 font = cv2.FONT_HERSHEY_PLAIN
+img = cv2.imread("airborne.jpg", 1)
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    s.connect((HOST, PORT))
+s.connect((HOST, PORT))
+
+fps = 0
+frames = 0
+
+while True:
+
+    startTime = time.time()
 
 
+    # img = cv2.imread("airborne.jpg", 1)
+    # value = input("Input new value: ")
+    pygame.event.pump()
 
-    while True:
+    xInput = joystick.get_axis(0) * servoRange
+    yInput = joystick.get_axis(1) * servoRange
+    zInput = joystick.get_axis(3) * servoRange
 
-        img = cv2.imread("airborne.jpg", 1)
-        # value = input("Input new value: ")
-        pygame.event.pump()
+    throttle = joystick.get_axis(2)
+    throttle = (((throttle + 1) * 50) - 100) * -1
 
-        xInput = joystick.get_axis(0) * servoRange
-        yInput = joystick.get_axis(1) * servoRange
-        zInput = joystick.get_axis(3) * servoRange
+    if joystick.get_button(1) == 1:
+        value = "q"
 
-        throttle = joystick.get_axis(2)
-        throttle = (((throttle + 1) * 50) - 100) * -1
+    if joystick.get_button(1) != 1:
+        xData = str(xInput + 1500)
+        yData = str(yInput + 1500)
+        zData = str(zInput + 1500)
+        tData = str(500 + (throttle * 20))
+        value = ("control " + xData + " " + yData + " " + zData + " " + tData)
 
-        if joystick.get_button(1) == 1:
-            value = "q"
+    s.sendall(bytes(value, 'utf8'))
 
-        if joystick.get_button(1) != 1:
-            xData = str(xInput + 1500)
-            yData = str(yInput + 1500)
-            zData = str(zInput + 1500)
-            tData = str(500 + (throttle * 20))
-            value = ("control " + xData + " " + yData + " " + zData + " " + tData)
+    # time.sleep(0.00166)
+    data = s.recv(2048000)
+    print("Data: ", data)
+    try:
 
-        s.sendall(bytes(value, 'utf8'))
-
-        # time.sleep(0.00166)
-
-        data = s.recv(1024)
-
+        # data = zlib.decompress(data)
+        image_string = str(data, 'utf-8')
+        print("Image String: " + image_string)
+        raw_image = base64.b64decode(image_string)
+        print("Raw image")
+        print(raw_image)
+        image = np.frombuffer(raw_image, dtype=np.uint8)
+        print(image)
+        cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+        # cv2.resizeWindow("image", 1280, 720)
+        cv2.resizeWindow("image", 720, 480)
+        img = cv2.imdecode(image, 1)
         string = "Throttle: " + str(int(throttle)) + "%"
-
         cv2.rectangle(img, (100, 200), (150 + 80, 200 + 25), (255, 255, 255), 1)
         cv2.putText(img, string, (101, 218), font, 1, (255, 255, 255), 1, cv2.LINE_AA)
         cv2.imshow("image", img)
+    except:
+        print("Didn't work")
+
+    delay = time.time() - startTime
+    # sleep = ((1 / 24) - delay % (1 / 24))
+    # time.sleep(sleep)
+    tickTime = delay
+    tickrate = 1 / tickTime
+
+    frames += 1
+    fps += tickrate
+    realFps = fps / frames
+
+    print("tickTime: ", tickTime)
+    print("tickrate: ", tickrate)
+    print("fps: ", realFps)
+
+
 
 
 
