@@ -6,8 +6,6 @@ import numpy as np
 import cv2
 import pygame
 import base64
-from multiprocessing import Process
-
 
 HOST = ''  # The server's hostname or IP address
 PORT = 65432       # The port used by the server
@@ -31,20 +29,12 @@ img = cv2.imread("airborne.jpg", 1)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-
-
 s.bind(server_address)
-# s.listen()
 print("Listening...")
-# conn, addr = s.accept()
-#
-# print("Connected by: ", addr)
-
 
 fps = 1
 frames = 1
 
-# with conn:
 while True:
     startTime = time.time()
     pygame.event.pump()
@@ -77,7 +67,6 @@ while True:
 
         if dataStrings[0] == "image":
             print("Entered if statement")
-        # if data:
             try:
                 img = None
                 if data:
@@ -96,21 +85,15 @@ while True:
                 print("Didn't work")
 
             delay = time.time() - startTime
-            # sleep = ((1 / 24) - delay % (1 / 24))
-            # time.sleep(sleep)
             tickTime = delay
             tickrate = 1 / tickTime
-
             frames += 1
             fps += tickrate
             realFps = fps / frames
-
-            # print("tickTime: ", tickTime)
-            # print("tickrate: ", tickrate)
             print("fps: ", realFps)
     except:
         print("No image data")
-# s.close
+
 
 
 
